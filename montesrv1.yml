@@ -1,0 +1,64 @@
+---
+- name: Install and maintain montesrv1
+  hosts: localhost
+  become: true
+  become_method: sudo
+  tasks:
+    - name: install packages
+      ansible.builtin.apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - htop
+          - lm-sensors
+          - smartmontools
+          - apt-transport-https
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+          - vim
+          - mc
+          - wireguard-tools
+          - wireguard
+          - zfsutils-linux
+        state: present
+        update_cache: true
+    - name: Add Docker GPG apt Key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      ansible.builtin.apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: true
+    - name: add seafile grp
+      ansible.builtin.group:
+        name: seafile
+        gid: 8000
+    - name: add seafile user
+      ansible.builtin.user:
+        name: seafile
+        group: seafile
+        uid: 8000
+        shell: /bin/bash
+        groups: docker
+    - name : ufw enable
+      community.general.ufw:
+        state: enabled
+    - name : ufw ssh
+      community.general.ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+
+
+
+
+
